@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YOLOv8 Object Detection Demo</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --bg: #f7f9fc;
+            --card: #ffffff;
+            --text: #18212f;
+            --muted: #5b6472;
+            --border: #dde3ea;
+            --accent: #1f6feb;
+            --danger: #c62828;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 32px 20px 48px;
+        }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+        }
+        h1, h2, h3 { margin-top: 0; }
+        p { line-height: 1.6; }
+        .muted { color: var(--muted); }
+        .grid {
+            display: grid;
+            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            margin-top: 20px;
+        }
+        .upload-box {
+            border: 2px dashed var(--border);
+            border-radius: 14px;
+            padding: 18px;
+            background: #fcfdff;
+        }
+        input[type="file"] {
+            width: 100%;
+            margin-top: 12px;
+            margin-bottom: 16px;
+        }
+        button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 18px;
+            font-size: 15px;
+            cursor: pointer;
+        }
+        button:hover { opacity: 0.95; }
+        .alert {
+            margin-top: 16px;
+            padding: 14px;
+            border-radius: 12px;
+            background: #fff0f0;
+            color: var(--danger);
+            border: 1px solid #ffd2d2;
+        }
+        .meta {
+            display: grid;
+            gap: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            margin-top: 16px;
+        }
+        .pill {
+            padding: 12px;
+            background: #f2f6ff;
+            border: 1px solid #dbe7ff;
+            border-radius: 12px;
+            font-size: 14px;
+        }
+        img.result {
+            width: 100%;
+            max-height: 650px;
+            object-fit: contain;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: white;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+        th, td {
+            text-align: left;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+        .empty {
+            padding: 12px;
+            background: #f8fbff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Glass vs Pen Detection</h1>
+            <p class="muted">
+                Upload an image and the YOLOv8 model will detect objects, draw bounding boxes,
+                and list the predicted class and confidence.
+            </p>
+            <div class="meta">
+                <div class="pill"><strong>Model path:</strong><br>{{ model_path }}</div>
+                <div class="pill"><strong>Confidence threshold:</strong><br>{{ conf_threshold }}</div>
+                <div class="pill"><strong>Inference image size:</strong><br>{{ img_size }}</div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h2>Upload image</h2>
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="upload-box">
+                        <label for="image"><strong>Select image</strong></label>
+                        <input id="image" type="file" name="image" accept=".png,.jpg,.jpeg,.webp" required>
+                        <button type="submit">Run detection</button>
+                    </div>
+                </form>
+
+                {% if error %}
+                    <div class="alert"><strong>Error:</strong> {{ error }}</div>
+                {% endif %}
+
+                <h3 style="margin-top: 24px;">Notes</h3>
+                <ul>
+                    <li>Place your trained weights at <code>models/best.pt</code>.</li>
+                    <li>You can change the threshold with the <code>CONF_THRESHOLD</code> environment variable.</li>
+                    <li>You can change inference size with the <code>IMG_SIZE</code> environment variable.</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2>Prediction</h2>
+                {% if prediction_image %}
+                    <img class="result" src="{{ prediction_image }}" alt="Prediction result">
+                {% else %}
+                    <div class="empty">No prediction yet. Upload an image to see the result here.</div>
+                {% endif %}
+
+                <h3 style="margin-top: 20px;">Detections</h3>
+                {% if detections %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Class</th>
+                                <th>Confidence</th>
+                                <th>Bounding Box [x1, y1, x2, y2]</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in detections %}
+                                <tr>
+                                    <td>{{ item.label }}</td>
+                                    <td>{{ item.confidence }}</td>
+                                    <td>{{ item.bbox }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% elif prediction_image %}
+                    <div class="empty">The model returned no detections above the confidence threshold.</div>
+                {% else %}
+                    <div class="empty">Detections will appear here after inference.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
