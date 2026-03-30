@@ -58,7 +58,7 @@ Then open:
 http://localhost:5000
 ```
 
-## Suggested GitHub repo contents
+## GitHub repo contents
 
 Upload these files to GitHub:
 - `app.py`
@@ -68,7 +68,7 @@ Upload these files to GitHub:
 - `README.md`
 - your trained `models/best.pt` if repository size allows it, otherwise attach it in your Google Drive submission or use Git LFS
 
-## Suggested online deployment workflow
+## Online deployment workflow
 
 ### Render
 1. Push the project to GitHub.
