@@ -33,7 +33,7 @@ def get_model() -> YOLO:
     if _model is None:
         if not MODEL_PATH.exists():
             raise FileNotFoundError(
-                f"Model weights not found at '{MODEL_PATH}'. Add your trained YOLO weights there "
+                f"Model weights not found at '{MODEL_PATH}'. Add trained YOLO weights there "
                 f"or set the MODEL_PATH environment variable."
             )
         _model = YOLO(str(MODEL_PATH))
